@@ -1,134 +1,179 @@
 import piece
+import board
 from tkinter import *
+from tkinter import font
 
-#create empty board
-board = [[0 for i in range(8)] for k in range(8)]
-#place black pawns
-for i in range (8):
-    board[i][6] = piece.Pawn("black", (i,6), "pawn","bp")
+class Graphics():
+    """Creates the Visuals for the Chess Game"""
 
-#place white pawns
-for i in range(8):
-    board[i][1] = piece.Pawn("white",(i,1),"pawn","wp")
+    def __init__(self):
+        # constants for image size
+        self.squareSize = 83
+        self.offset = 20
 
-#place white rooks
-for (a,b) in [(0,0), (7,0)]:
-    board[a][b] = piece.Rook("white",(a,b),"rook","wr")
+        #window creation and settings
+        self.window = Tk()
+        self.window.title('Chess- by Nathaniel Danandeh')
+        self.canvas = Canvas(self.window,width = 800,height = 800, bg = "white")
 
-#place black rooks
-for (a,b) in [(0,7), (7,7)]:
-    board[a][b] = piece.Rook("black",(a,b), "rook","br")
+        #import images from assets folder
+        self.boardIm = PhotoImage(file='assets/board.gif')
+        self.whitePawnIm = PhotoImage(file='assets/white_pawn.gif')
+        self.blackPawnIm = PhotoImage(file='assets/black_pawn.gif')
+        self.whiteRookIm = PhotoImage(file='assets/white_rook.gif')
+        self.blackRookIm = PhotoImage(file='assets/black_rook.gif')
+        self.whiteKnightIm = PhotoImage(file='assets/white_knight.gif')
+        self.blackKnightIm = PhotoImage(file='assets/black_knight.gif')
+        self.whiteBishopIm = PhotoImage(file='assets/white_bishop.gif')
+        self.blackBishopIm = PhotoImage(file='assets/black_bishop.gif')
+        self.whiteQueenIm = PhotoImage(file='assets/white_queen.gif')
+        self.blackQueenIm = PhotoImage(file='assets/black_queen.gif')
+        self.whiteKingIm = PhotoImage(file='assets/white_king.gif')
+        self.blackKingIm = PhotoImage(file='assets/black_king.gif')
+        self.selectedIm = PhotoImage(file='assets/selected.gif')
 
-#place white bishops
-for (a,b) in [(2,0), (5,0)]:
-    board[a][b] = piece.Bishop("white",(a,b),"bishop","wb")
+        #Create instance of game logic that the GUI gets info from
+        self.gameLogic = board.Board()
 
-#place black bishops
-for (a,b) in [(2,7), (5,7)]:
-    board[a][b] = piece.Bishop("black",(a,b),"bishop","bb")
+    def gameOver(self):
+        """ Creates "Game Over" text on the screen """
+        helv50 = font.Font(family='Helvetica',size=50, weight='bold')
+        self.canvas.create_text(400,400,text='Game Over', font=helv50, fill='red')
+        self.canvas.pack()
 
-#place white knights
-for (a,b) in [(1,0), (6,0)]:
-    board[a][b] = piece.Knight("white",(a,b),"knight","wk")
+    def update(self,turn):
+        """ main graphics update function. Looks at state of game board and updates visuals accordingly
+        input: turn - # of turns in the game(determines whose turn it is currently)"""
 
-#place black knights
-for (a,b) in [(1,7), (6,7)]:
-    board[a][b] = piece.Knight("black",(a,b),"knight","bk")
+        #rename constants and board for ease of use
+        board = self.gameLogic.getBoard()
+        squareSize = self.squareSize
+        offset = self.offset
 
-#place white queen
-board[3][0] = piece.Queen("white", (3,0), "queen","wQ")
+        #draw the board image on the canvas
+        self.canvas.create_image(400, 400, image=self.boardIm)
 
-#place black queen
-board[3][7] = piece.Queen("black", (3,7), "queen", "bQ")
+        #Print the color whose turn it is at the top left of the screen
+        self.canvas.create_text(15,10,text="Turn:")
+        if(turn%2 == 0):
+            self.canvas.create_text(50,10,text="gold")
+        else:
+            self.canvas.create_text(50,10,text="silver")
 
-#place white king
-board[4][0] = piece.King("white", (4,0), "king", "wKi")
+        #draw all the pieces as they appear on the logic board
+        for k in range(8):
+            for i in range(8):
+                if (isinstance(board[i][k], piece.Piece)):
+                    if (board[i][k].name == 'pawn'):
+                        if(board[i][k].color == 'white'):
+                            self.canvas.create_image(board[i][k].position[0]*squareSize + squareSize + offset,
+                            board[i][k].position[1]*squareSize +squareSize + offset , image=self.whitePawnIm)
+                        else:
+                            self.canvas.create_image(board[i][k].position[0] * squareSize + squareSize + offset,
+                                                board[i][k].position[1] * squareSize + squareSize + offset,
+                                                image=self.blackPawnIm)
+                    elif(board[i][k].name == 'bishop'):
+                        if (board[i][k].color == 'white'):
+                            self.canvas.create_image(board[i][k].position[0] * squareSize + squareSize + offset,
+                                                board[i][k].position[1] * squareSize + squareSize + offset,
+                                                image=self.whiteBishopIm)
+                        else:
+                            self.canvas.create_image(board[i][k].position[0] * squareSize + squareSize + offset,
+                                                board[i][k].position[1] * squareSize + squareSize + offset,
+                                                image=self.blackBishopIm)
+                    elif(board[i][k].name == 'knight'):
+                        if (board[i][k].color == 'white'):
+                            self.canvas.create_image(board[i][k].position[0] * squareSize + squareSize + offset,
+                                                board[i][k].position[1] * squareSize + squareSize + offset,
+                                                image=self.whiteKnightIm)
+                        else:
+                            self.canvas.create_image(board[i][k].position[0] * squareSize + squareSize + offset,
+                                                board[i][k].position[1] * squareSize + squareSize + offset,
+                                                image=self.blackKnightIm)
+                    elif (board[i][k].name == 'rook'):
+                        if (board[i][k].color == 'white'):
+                            self.canvas.create_image(board[i][k].position[0] * squareSize + squareSize + offset,
+                                                board[i][k].position[1] * squareSize + squareSize + offset,
+                                                image=self.whiteRookIm)
+                        else:
+                            self.canvas.create_image(board[i][k].position[0] * squareSize + squareSize + offset,
+                                                board[i][k].position[1] * squareSize + squareSize + offset,
+                                                image=self.blackRookIm)
 
-#place black king
-board[4][7] = piece.King("black", (4,7), "king", "bKi")
+                    elif (board[i][k].name == 'queen'):
+                        if (board[i][k].color == 'white'):
+                            self.canvas.create_image(board[i][k].position[0] * squareSize + squareSize + offset,
+                                                board[i][k].position[1] * squareSize + squareSize + offset,
+                                                image=self.whiteQueenIm)
+                        else:
+                            self.canvas.create_image(board[i][k].position[0] * squareSize + squareSize + offset,
+                                                board[i][k].position[1] * squareSize + squareSize + offset,
+                                                image=self.blackQueenIm)
 
-def movePiece(pos, dest):
-    board[dest[0]][dest[1]] = board[pos[0]][pos[1]]
-    board[pos[0]][pos[1]] = 0
-    board[dest[0]][dest[1]].position = (dest[0],dest[1])
+                    elif (board[i][k].name == 'king'):
+                        if (board[i][k].color == 'white'):
+                            self.canvas.create_image(board[i][k].position[0] * squareSize + squareSize + offset,
+                                                board[i][k].position[1] * squareSize + squareSize + offset,
+                                                image=self.whiteKingIm)
+                        else:
+                            self.canvas.create_image(board[i][k].position[0] * squareSize + squareSize + offset,
+                                                board[i][k].position[1] * squareSize + squareSize + offset,
+                                                image=self.blackKingIm)
 
+                else:
+                    continue
 
-
-
-def checkTraverse(pos,dest):
-    #is capture
-    if( isinstance(board[dest[0]][dest[1]],piece.Piece) and board[pos[0]][pos[1]].color != board[dest[0]][dest[1]].color):
-        return board[pos[0]][pos[1]].traverse(dest, True)
-        print("Capturing Piece")
-    #is not capture
-    else:
-        return board[pos[0]][pos[1]].traverse(dest)
-
-def checkPossible(pos,dest):
-    if( isinstance(board[pos[0]][pos[1]], piece.Pawn)):
-        if( isinstance(board[dest[0]][dest[1]],piece.Piece) and board[pos[0]][pos[1]].color != board[dest[0]][dest[1]].color):
-            return board[pos[0]][pos[1]].possible(dest,True)
-    return board[pos[0]][pos[1]].possible(dest)
-
-
-def checkCheck(pos,color):
-    pass
-
-gameOn = True
-
-
-root = Tk()
-
-w = Label(root, text = "Hello , world!")
-w.pack()
-
-root.mainloop()
-
-#start gameloop
-while(gameOn):
-
-    moveSuccess = True
-
-    print("============================================")
-    for k in range(8):
-        for i in range(8):
-            if(isinstance(board[i][k],piece.Piece)):
-                print('{:5}'.format(board[i][k].temp),end='')
-            else:
-                print('{:5}'.format('x'),end='')
-
-        print('')
-    print("============================================")
-
-    move = [int(x) for x in input("Enter Move:     ").split()]
-
-    try:
-        if(len(move) != 4 ) :
-            raise Exception('incorrect # of inputs')
-    except Exception:
-        print("Must enter 4 nums, Try again ")
-        continue
-        
-    if (not isinstance(board[move[0]][move[1]], piece.Piece)):
-        print("Enter space with Piece on it, Try again")
-        continue
-    
-
-    if(checkPossible(move[:2],move[2:])):
-        traverse = checkTraverse(move[:2], move[2:])
-        for (a,b) in traverse:
-            print('{} {}'.format(a,b))
-            if(isinstance(board[a][b],piece.Piece)):
-                moveSuccess = False
-                print("failed Traverse")
-                break
-    else:
-        moveSuccess = False
+################################# END OF GRAPHICS CLASS #################################
 
 
-    if (moveSuccess):
-        movePiece(move[:2],move[2:])
+moveList = []             #list of moves made
+clickNum = 0              #number of clicks on the window so far
+graphics = Graphics()     #instance of Graphics class
 
-    else: 
-        print("Move Failure")
+def callback(event):
+    """Function that occurs on clicks of the window """
+
+    #define variables used and increment click number
+    global clickNum
+    gameLogic = graphics.gameLogic
+    clickNum = clickNum +1
+
+    #get the move from the click
+    moveList.append((int(event.x/graphics.squareSize -1), int(event.y/graphics.squareSize -1)))
+
+    #Create a red square around the chosen piece
+    graphics.canvas.create_image((moveList[-1][0]+1)*graphics.squareSize + graphics.offset,
+                                 (moveList[-1][1]+1)*graphics.squareSize + graphics.offset,image=graphics.selectedIm)
+    graphics.canvas.pack()
+
+    #if second click (a move) then check if valid, move piece, and update graphics
+    if(clickNum%2 == 0):
+        if(gameLogic.completeMoveCheck(moveList[-2], moveList[-1])):
+            gameLogic.movePiece(moveList[-2],moveList[-1])
+            graphics.canvas.delete("all")
+            graphics.update(gameLogic.getTurn())
+            graphics.canvas.pack()
+
+            #check if game is over
+            if(gameLogic.getMate()):
+                graphics.gameOver()
+        else:
+
+            #if move is not valid, remove last two moves from list and refresh graphics
+            moveList.pop()
+            moveList.pop()
+            graphics.canvas.delete("all")
+            graphics.update(gameLogic.getTurn())
+            graphics.canvas.pack()
+
+
+#bind a the callback function to the canvas
+graphics.canvas.bind("<Button-1>", callback)
+
+#call first update of the graphics (before any clicks occur)
+graphics.update(graphics.gameLogic.getTurn())
+graphics.canvas.pack()
+
+#start the main window, and game, loop
+graphics.window.mainloop()
 
